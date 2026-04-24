@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>«我也想不到啊！» 遊戲攻略</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=DotGothic16&display=swap');
+        :root {
+            --joker-purple: #6b46c1;
+            --joker-pink: #d53f8c;
+            --joker-cyan: #0bc5ea;
+        }
+        body {
+            background-color: #05000a;
+            color: #e2e8f0;
+            font-family: 'DotGothic16', "Microsoft JhengHei", sans-serif;
+            overflow-x: hidden;
+            cursor: crosshair;
+            margin: 0;
+        }
+        .title-font {
+            font-family: 'Ma Shan Zheng', cursive;
+        }
+        .mystic-font {
+            font-family: 'Zhi Mang Xing', cursive;
+        }
+        @keyframes flicker {
+            0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% {
+                opacity: 0.99;
+                text-shadow: -2px -2px 0 var(--joker-cyan), 2px 2px 0 var(--joker-pink);
+            }
+            20%, 21.999%, 63%, 63.999%, 65%, 69.999% {
+                opacity: 0.4;
+                text-shadow: none;
+            }
+        }
+        .flicker-text {
+            animation: flicker 3s infinite;
+        }
+        .noise {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            opacity: .05;
+            z-index: 9999;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJuIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC42NSIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNuKSIvPjwvc3ZnPg==');
+        }
+        .joker-instance {
+            position: fixed;
+            width: 100px;
+            z-index: 100;
+            filter: drop-shadow(0 0 10px var(--joker-purple));
+            pointer-events: none;
+            will-change: transform;
+        }
+        .ritual-box {
+            background: rgba(45, 10, 80, 0.3);
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--joker-purple);
+            box-shadow: 0 0 20px rgba(107, 70, 193, 0.2);
+        }
+        .img-container {
+            background: #000;
+            border: 2px solid var(--joker-purple);
+            overflow: hidden;
+        }
+        #static-content {
+            position: relative;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+<div class="noise"></div>
+<div id="joker-army-container"></div>
+<div id="static-content" class="max-w-4xl mx-auto px-4 py-12 relative">
+    <header class="text-center mb-20">
+        <h1 class="text-6xl md:text-9xl title-font text-pink-500 mb-4 flicker-text">海之宮教會</h1>
+        <p class="text-xl text-cyan-400 tracking-widest uppercase">Umimiya Natsu is the Joker</p>
+        <div class="mt-8 border-4 border-purple-900 p-2 inline-block bg-black rounded-xl shadow-[0_0_40px_rgba(107,70,193,0.5)]">
+            <img src="1.webp" alt="海宮夏聖像" class="w-full max-w-lg mx-auto">
+        </div>
+    </header>
+    <main class="space-y-24">
+        <section class="ritual-box p-8 rounded-lg">
+            <h2 class="text-3xl text-pink-400 mb-6 border-b border-pink-900 pb-2">海鹽信條</h2>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="space-y-6 text-lg">
+                    <p class="hover:text-cyan-400 transition-colors">1. 我們皆為海宮夏的「海鹽」，鹹是我們的本質。</p>
+                    <p class="hover:text-cyan-400 transition-colors">2. 海宮夏的面具下，藏著宇宙的真理──「小丑」。</p>
+                    <p class="hover:text-cyan-400 transition-colors">3. 我也想不到啊！</p>
+                    <p class="hover:text-cyan-400 transition-colors">4. 百合最高！</p>
+                    <p class="hover:text-cyan-400 transition-colors">5. 沒有所謂攻略，只有遵守信條。</p>
+                </div>
+                <div class="relative overflow-hidden border-2 border-pink-900 rounded-lg bg-black shadow-[0_0_20px_rgba(213,63,140,0.3)]">
+                    <img src="2.webp" alt="真理之眼" class="w-full h-full object-cover">
+                </div>
+            </div>
+        </section>
+        <section class="text-center bg-white/5 py-16 rounded-3xl border border-white/10">
+            <h2 class="text-4xl mb-8 flicker-text title-font">神使海宮夏</h2>
+            <div class="flex justify-center flex-col items-center">
+                <img src="4.webp" alt="神使聖像" class="w-80 filter drop-shadow-[0_0_30px_rgba(213,63,140,0.8)]">
+                <p class="mt-8 text-cyan-500 text-2xl font-bold">海鹽們，感受到這份小丑力了嗎？</p>
+            </div>
+        </section>
+    </main>
+    <footer class="mt-32 text-center border-t border-gray-800 pt-8 pb-12">
+        <div class="mt-4 flex justify-center gap-4 opacity-30 text-[10px]">
+            <span>蛤</span><span>蛤</span><span>蛤</span><span>蛤</span><span>蛤</span><span>蛤</span><span>蛤</span>
+        </div>
+    </footer>
+</div>
+<script>
+    const jokerCount = 24;
+    const container = document.getElementById('joker-army-container');
+    const jokers = [];
+    function initJokerArmy() {
+        for (let i = 0; i < jokerCount; i++) {
+            const img = document.createElement('img');
+            img.src = '3.webp';
+            img.className = 'joker-instance';
+            img.onerror = function() { this.alt = '圖3'; };
+            const jokerData = {
+                element: img,
+                x: Math.random() * (window.innerWidth - 100),
+                y: Math.random() * (window.innerHeight - 100),
+                dx: (Math.random() - 0.5) * 8, // 稍微提升了一點速度，增加混亂感
+                dy: (Math.random() - 0.5) * 8,
+                angle: Math.random() * 360,
+                rotationSpeed: (Math.random() - 0.5) * 5
+            };
+            container.appendChild(img);
+            jokers.push(jokerData);
+        }
+    }
+    function animateJokers() {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        jokers.forEach(joker => {
+            const size = 100;
+            if (joker.x + joker.dx > width - size || joker.x + joker.dx < 0) {
+                joker.dx = -joker.dx;
+            }
+            if (joker.y + joker.dy > height - size || joker.y + joker.dy < 0) {
+                joker.dy = -joker.dy;
+            }
+            joker.x += joker.dx;
+            joker.y += joker.dy;
+            joker.angle += joker.rotationSpeed;
+            joker.element.style.transform = `translate(${joker.x}px, ${joker.y}px) rotate(${joker.angle}deg)`;
+        });
+        requestAnimationFrame(animateJokers);
+    }
+    window.addEventListener('resize', () => {
+        jokers.forEach(joker => {
+            joker.x = Math.min(joker.x, window.innerWidth - 100);
+            joker.y = Math.min(joker.y, window.innerHeight - 100);
+        });
+    });
+    window.onload = () => {
+        initJokerArmy();
+        animateJokers();
+    };
+    document.addEventListener('mousemove', (e) => {
+        if (Math.random() > 0.95) {
+            const span = document.createElement('span');
+            span.innerText = '蛤？';
+            span.className = 'mystic-font';
+            span.style.position = 'fixed';
+            span.style.left = e.clientX + 'px';
+            span.style.top = e.clientY + 'px';
+            span.style.pointerEvents = 'none';
+            span.style.color = Math.random() > 0.5 ? 'var(--joker-pink)' : 'var(--joker-cyan)';
+            span.style.fontSize = '24px';
+            span.style.zIndex = '1000';
+            document.body.appendChild(span);
+            let opacity = 1;
+            const fade = setInterval(() => {
+                opacity -= 0.05;
+                span.style.opacity = opacity;
+                if (opacity <= 0) {
+                    clearInterval(fade);
+                    span.remove();
+                }
+            }, 50);
+        }
+    });
+</script>
+</body>
+</html>
