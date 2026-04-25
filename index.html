@@ -17,16 +17,41 @@
             color: #e2e8f0;
             font-family: 'DotGothic16', "Microsoft JhengHei", sans-serif;
             overflow-x: hidden;
-            cursor: none; 
+            cursor: none !important; 
             margin: 0;
             width: 100vw;
             height: 100vh;
         }
+
+        #cockroach-cursor {
+            position: fixed;
+            width: 50px;
+            height: 50px;
+            font-size: 40px;
+            pointer-events: none;
+            z-index: 999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            will-change: transform;
+            line-height: 1;
+            transform-origin: center center;
+        }
+
+        .unified-header {
+            font-family: 'Noto Serif TC', "cwTeXQKai", "STKaiti", "Microsoft JhengHei", serif;
+            font-weight: 900;
+            background: linear-gradient(to bottom, #ffffff 30%, var(--joker-pink) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(213, 63, 140, 0.6));
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            font-style: italic;
+        }
+
         .title-font {
             font-family: 'Ma Shan Zheng', cursive;
-        }
-        .mystic-font {
-            font-family: 'Zhi Mang Xing', cursive;
         }
         @keyframes flicker {
             0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% {
@@ -56,19 +81,13 @@
             filter: drop-shadow(0 0 10px var(--joker-purple));
             pointer-events: none;
             will-change: transform;
+            backface-visibility: hidden;
         }
-        #cockroach-cursor {
-            position: fixed;
-            width: 40px;
-            height: 40px;
-            z-index: 30000; 
-            pointer-events: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            will-change: transform;
-            transform: translate3d(-100px, -100px, 0);
+        .dead-red {
+            filter: brightness(0) saturate(100%) invert(13%) sepia(95%) saturate(7454%) hue-rotate(0deg) brightness(100%) contrast(115%) !important;
+            opacity: 1 !important;
         }
+
         .ritual-box {
             background: rgba(45, 10, 80, 0.3);
             backdrop-filter: blur(5px);
@@ -86,7 +105,7 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 25000; /* 高於內容，低於游標 */
+            z-index: 25000;
         }
         .swarm-cockroach {
             position: absolute;
@@ -94,20 +113,25 @@
             pointer-events: none;
             will-change: transform;
             line-height: 1;
-            display: inline-block;
+            display: none;
+            backface-visibility: hidden;
+        }
+        
+        a, button, img {
+            cursor: none !important;
         }
     </style>
 </head>
 <body>
 <div class="noise"></div>
-<div id="cockroach-cursor">
-    <span style="font-size: 30px;">🪳</span>
-</div>
+<div id="cockroach-cursor">🪳</div>
+
 <div id="joker-army-container"></div>
 <div id="swarm-container"></div>
+
 <div id="static-content" class="max-w-4xl mx-auto px-4 py-12 relative">
     <header class="text-center mb-20">
-        <h1 class="text-6xl md:text-9xl title-font text-pink-500 mb-4 flicker-text">海之宮教會</h1>
+        <h1 class="text-6xl md:text-9xl unified-header text-white mb-4 flicker-text">海之宮教會</h1>
         <p class="text-xl text-cyan-400 tracking-widest uppercase">Umimiya Natsu is the Joker</p>
         <div class="mt-8 border-4 border-purple-900 p-2 inline-block bg-black rounded-xl shadow-[0_0_40px_rgba(107,70,193,0.5)]">
             <img src="1.webp" alt="海宮夏聖像" class="w-full max-w-lg mx-auto" onerror="this.src='https://via.placeholder.com/500x300?text=IMAGE+1'">
@@ -143,157 +167,215 @@
         </div>
     </footer>
 </div>
+
 <script>
     const jokerCount = 66; 
     const container = document.getElementById('joker-army-container');
     const swarmContainer = document.getElementById('swarm-container');
-    const cockroachCursor = document.getElementById('cockroach-cursor');
+    const cursorCockroach = document.getElementById('cockroach-cursor');
+    const cursorStyle = cursorCockroach.style;
     const jokers = [];
-    const swarm = []; 
+    
+    let swarmPool = [];
+    let activeSwarm = [];
     let mX = -2000;
     let mY = -2000;
+    let prevMX = 0;
+    let prevMY = 0;
+    let cursorAngle = 0;
     let isSwarming = false;
-    let swarmInterval = null;
+    let swarmStartTime = 0;
+
+    function createSwarmElement() {
+        const span = document.createElement('span');
+        span.innerText = '🪳';
+        span.className = 'swarm-cockroach';
+        swarmContainer.appendChild(span);
+        return {
+            element: span,
+            elStyle: span.style,
+            active: false,
+            x: 0, y: 0, dx: 0, dy: 0, angle: 0,
+            hasEntered: false
+        };
+    }
+
     function initJokerArmy() {
         for (let i = 0; i < jokerCount; i++) {
             const img = document.createElement('img');
             img.src = '3.webp';
             img.className = 'joker-instance';
-            img.onerror = function() { 
-                this.style.display = 'none'; 
-                const span = document.createElement('span');
-                span.innerText = '🤡';
-                span.style.fontSize = '50px';
-                span.style.position = 'fixed';
-                span.className = 'joker-instance';
-                container.appendChild(span);
-                jokers[i].element = span;
-            };  
-            const jokerData = {
-                element: img,
-                x: Math.random() * (window.innerWidth - 100),
-                y: Math.random() * (window.innerHeight - 100),
-                dx: (Math.random() - 0.5) * 15, 
-                dy: (Math.random() - 0.5) * 15,
+            const clone = img.cloneNode();
+            container.appendChild(img);
+            container.appendChild(clone);
+
+            jokers.push({
+                element: img, elStyle: img.style,
+                clone: clone, clStyle: clone.style,
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                dx: (Math.random() - 0.5) * 10, 
+                dy: (Math.random() - 0.5) * 10,
                 angle: Math.random() * 360,
                 rotationSpeed: (Math.random() - 0.5) * 10,
                 dead: false,
                 gravity: 0.8 + Math.random() * 0.4
-            };
-            container.appendChild(img);
-            jokers.push(jokerData);
+            });
+        }
+
+        for (let i = 0; i < 1000; i++) {
+            swarmPool.push(createSwarmElement());
         }
     }
-    function createSwarmCockroach() {
-        const span = document.createElement('span');
-        span.innerText = '🪳';
-        span.className = 'swarm-cockroach';
+
+    function spawnFromAnywhere() {
+        let data = swarmPool.find(item => !item.active);
+        if (!data) {
+            data = createSwarmElement();
+            swarmPool.push(data);
+        }
+
         const w = window.innerWidth;
         const h = window.innerHeight;
         let x, y;
+        
         const side = Math.floor(Math.random() * 4);
         const margin = 50;
-        if(side === 0) { x = -margin; y = Math.random() * h; }
-        else if(side === 1) { x = w + margin; y = Math.random() * h; }
-        else if(side === 2) { x = Math.random() * w; y = -margin; }
+        if (side === 0) { x = -margin; y = Math.random() * h; }
+        else if (side === 1) { x = w + margin; y = Math.random() * h; }
+        else if (side === 2) { x = Math.random() * w; y = -margin; }
         else { x = Math.random() * w; y = h + margin; }
-        const centerX = w / 2;
-        const centerY = h / 2;
-        const angleToCenter = Math.atan2(centerY - y, centerX - x);
+        
+        const angleToCenter = Math.atan2(h/2 - y, w/2 - x);
         const spreadAngle = angleToCenter + (Math.random() - 0.5) * 1.5; 
-        const speed = 1.2 + Math.random() * 2.5;
-        const data = {
-            element: span,
-            x: x,
-            y: y,
-            dx: Math.cos(spreadAngle) * speed,
-            dy: Math.sin(spreadAngle) * speed,
-            angle: spreadAngle * 180 / Math.PI + 90
-        };
-        swarmContainer.appendChild(span);
-        swarm.push(data);
+        const speed = 3 + Math.random() * 8;
+
+        data.active = true;
+        data.hasEntered = false;
+        data.x = x;
+        data.y = y;
+        data.dx = Math.cos(spreadAngle) * speed;
+        data.dy = Math.sin(spreadAngle) * speed;
+        data.angle = spreadAngle * 180 / Math.PI + 90;
+        data.elStyle.display = 'inline-block';
+        
+        activeSwarm.push(data);
     }
-    function startSwarm() {
-        isSwarming = true;
-        swarmInterval = setInterval(() => {
-            for(let i=0; i<4; i++) createSwarmCockroach();
-        }, 80);
+
+    function updateCursor() {
+        const deltaX = mX - prevMX;
+        const deltaY = mY - prevMY;
+        if (Math.abs(deltaX) > 0.5 || Math.abs(deltaY) > 0.5) {
+            cursorAngle = Math.atan2(deltaY, deltaX) * 180 / Math.PI + 90;
+        }
+        cursorStyle.transform = `translate3d(${mX - 25}px, ${mY - 25}px, 0) rotate(${cursorAngle}deg)`;
+        prevMX = mX;
+        prevMY = mY;
     }
-    function animate() {
+
+    function animate(time) {
+        updateCursor();
         const w = window.innerWidth;
         const h = window.innerHeight;
-        const fearRadius = 160; 
-        const killRadius = 55; 
         const size = 100;
-        cockroachCursor.style.transform = `translate3d(${mX}px, ${mY}px, 0) translate(-50%, -50%)`;
+        
         let aliveCount = 0;
         for (let i = 0; i < jokers.length; i++) {
             const j = jokers[i];
             if (j.dead) {
+                j.clStyle.display = 'none';
                 if (j.y < h - size) {
                     j.dy += j.gravity;
                     j.y += j.dy;
-                    j.element.style.transform = `translate3d(${j.x}px, ${j.y}px, 0) rotate(${j.angle}deg)`;
+                    j.elStyle.transform = `translate3d(${j.x}px, ${j.y}px, 0) rotate(${j.angle}deg)`;
                 }
                 continue;
             }
             aliveCount++;
-            j.x += j.dx;
-            j.y += j.dy;
-            const cX = j.x + size / 2;
-            const cY = j.y + size / 2;
-            const dx = cX - mX;
-            const dy = cY - mY;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < killRadius) {
-                j.dead = true;
-                j.dy = 1;
-                j.element.style.filter = 'brightness(0) saturate(100%) invert(13%) sepia(95%) saturate(7454%) hue-rotate(0deg)';
-                j.element.style.zIndex = '50'; 
-            } else if (dist < fearRadius) {
+            j.x += j.dx; j.y += j.dy;
+            if (j.x < -size) j.x += w + size;
+            if (j.x > w) j.x -= w + size;
+            if (j.y < 0) { j.y = 0; j.dy *= -1; }
+            else if (j.y > h - size) { j.y = h - size; j.dy *= -1; }
+
+            const dx = (j.x + 50) - mX;
+            const dy = (j.y + 50) - mY;
+            const distSq = dx * dx + dy * dy;
+
+            if (distSq < 4225) { // 65^2
+                j.dead = true; j.dy = 1;
+                j.element.classList.add('dead-red');
+                j.element.style.zIndex = '50';
+            } else if (distSq < 48400) { // 220^2
+                const dist = Math.sqrt(distSq);
                 const ang = Math.atan2(dy, dx);
-                const spd = 12 + Math.random() * 18; 
-                j.dx = Math.cos(ang) * spd;
-                j.dy = Math.sin(ang) * spd;
+                const spd = 25 + ((220 - dist) / 220) * 45; 
+                j.dx = Math.cos(ang) * spd; j.dy = Math.sin(ang) * spd;
             }
-            if (j.x < 0 || j.x > w - size) j.dx *= -1;
-            if (j.y < 0 || j.y > h - size) j.dy *= -1;
-            j.dx *= 0.97;
-            j.dy *= 0.97;
-            j.angle += j.rotationSpeed;
-            j.element.style.transform = `translate3d(${j.x}px, ${j.y}px, 0) rotate(${j.angle}deg)`;
+            j.dx *= 0.95; j.dy *= 0.95; j.angle += j.rotationSpeed;
+            j.elStyle.transform = `translate3d(${j.x}px, ${j.y}px, 0) rotate(${j.angle}deg)`;
+            
+            let cloneX = j.x;
+            if (j.x > w - size) { cloneX = j.x - (w + size); j.clStyle.display = 'block'; }
+            else if (j.x < 0) { cloneX = j.x + (w + size); j.clStyle.display = 'block'; }
+            else { j.clStyle.display = 'none'; }
+            j.clStyle.transform = `translate3d(${cloneX}px, ${j.y}px, 0) rotate(${j.angle}deg)`;
         }
+
         if (aliveCount === 0 && !isSwarming) {
-            startSwarm();
+            isSwarming = true;
+            swarmStartTime = time;
         }
+
         if (isSwarming) {
-            for (let i = 0; i < swarm.length; i++) {
-                const s = swarm[i];
+            const elapsed = (time - swarmStartTime) / 1000;
+            let spawnRate = Math.min(60, 2 + Math.pow(elapsed, 2.8) * 0.1);
+            
+            for(let k=0; k < spawnRate; k++) {
+                spawnFromAnywhere();
+            }
+
+            for (let i = 0; i < activeSwarm.length; i++) {
+                const s = activeSwarm[i];
                 s.x += s.dx;
                 s.y += s.dy;
-                if (Math.random() < 0.03) {
-                    const angleJitter = (Math.random() - 0.5) * 0.5;
-                    const currentAngle = Math.atan2(s.dy, s.dx) + angleJitter;
-                    const speed = Math.sqrt(s.dx*s.dx + s.dy*s.dy);
-                    s.dx = Math.cos(currentAngle) * speed;
-                    s.dy = Math.sin(currentAngle) * speed;
-                    s.angle = currentAngle * 180 / Math.PI + 90;
+
+                const pad = 20;
+                if (!s.hasEntered) {
+                    if (s.x > 0 && s.x < w - pad && s.y > 0 && s.y < h - pad) {
+                        s.hasEntered = true;
+                    }
                 }
-                if (s.x < -200 || s.x > w + 200 || s.y < -200 || s.y > h + 200) {
-                     const ang = Math.atan2(h/2 - s.y, w/2 - s.x);
-                     s.dx = Math.cos(ang) * 2;
-                     s.dy = Math.sin(ang) * 2;
-                     s.angle = ang * 180 / Math.PI + 90;
+
+                if (s.hasEntered) {
+                    if (s.x < 0 || s.x > w - pad) {
+                        s.dx *= -1;
+                        s.x = Math.max(0, Math.min(w - pad, s.x));
+                    }
+                    if (s.y < 0 || s.y > h - pad) {
+                        s.dy *= -1;
+                        s.y = Math.max(0, Math.min(h - pad, s.y));
+                    }
                 }
-                s.element.style.transform = `translate3d(${s.x}px, ${s.y}px, 0) rotate(${s.angle}deg)`;
+
+                if (Math.random() < 0.02) { 
+                    const angle = Math.atan2(s.dy, s.dx) + (Math.random() - 0.5) * 1.5;
+                    const speed = 6 + Math.random() * 8;
+                    s.dx = Math.cos(angle) * speed;
+                    s.dy = Math.sin(angle) * speed;
+                    s.angle = angle * 180 / Math.PI + 90;
+                }
+                s.elStyle.transform = `translate3d(${s.x}px, ${s.y}px, 0) rotate(${s.angle}deg)`;
             }
         }
         requestAnimationFrame(animate);
     }
+
     document.addEventListener('mousemove', (e) => {
         mX = e.clientX;
         mY = e.clientY;
     });
+
     window.onload = () => {
         initJokerArmy();
         requestAnimationFrame(animate);
